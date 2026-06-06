@@ -65,8 +65,15 @@ body::after {
 
 .page { max-width: 1100px; margin: 0 auto; }
 
-.dash-title {
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0 0 18px;
+}
+.dash-title {
+  margin: 0;
   font-size: 28px; font-weight: 700;
   letter-spacing: -0.025em;
   background: linear-gradient(180deg, #FFFFFF 0%, #C7C4BC 120%);
@@ -74,6 +81,254 @@ body::after {
   -webkit-text-fill-color: transparent; color: transparent;
 }
 @media (max-width: 480px) { .dash-title { font-size: 22px; } }
+
+.gear-btn {
+  width: 42px; height: 42px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+.gear-btn:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.14);
+  color: var(--text-primary);
+}
+.gear-btn:hover .gear-icon { transform: rotate(28deg); }
+.gear-btn:active { transform: scale(0.96); }
+.gear-btn:active .gear-icon { transform: rotate(46deg); }
+.gear-icon {
+  width: 20px; height: 20px;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: 50% 50%;
+}
+
+/* ===== Settings modal ===== */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(5,5,6,0.72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-bg.show { display: flex; }
+.modal {
+  width: 100%; max-width: 480px;
+  max-height: 88vh; overflow-y: auto;
+  background: rgba(20,20,22,0.92);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 22px 22px 24px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(24px) saturate(1.2);
+  color: var(--text-primary);
+  position: relative;
+}
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 0 0 16px;
+}
+.modal-title {
+  margin: 0;
+  font-size: 18px; font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+.modal-close {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-secondary);
+  font-size: 18px; line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.modal-close:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+
+.field {
+  display: flex; flex-direction: column;
+  gap: 6px; margin-bottom: 12px;
+}
+.field-label {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.field-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.field-row.height-cm { grid-template-columns: 1fr 1fr; }
+.field-row.height-ftin { grid-template-columns: 1fr 1fr 1fr; }
+
+.input,
+.field input[type="number"] {
+  background: rgba(0,0,0,0.30);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-primary);
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  padding: 10px 12px; border-radius: 10px; outline: none;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button,
+.field input[type="number"]::-webkit-outer-spin-button,
+.field input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.input:focus,
+.field input[type="number"]:focus {
+  border-color: rgba(255,255,255,0.22);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+}
+
+.seg {
+  display: inline-flex; gap: 3px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px; padding: 3px;
+}
+.seg button {
+  flex: 1;
+  padding: 8px 12px;
+  border: none; background: transparent;
+  color: var(--text-tertiary);
+  border-radius: 7px;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.seg button:hover { color: var(--text-secondary); }
+.seg button.active {
+  background: linear-gradient(180deg, #FFFFFF 0%, #E8E5DD 100%);
+  color: #0a0a0b;
+}
+
+.btn-primary {
+  width: 100%; padding: 13px;
+  border: none;
+  background: linear-gradient(180deg, #FFFFFF 0%, #E8E5DD 100%);
+  color: #0a0a0b; border-radius: 12px;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 6px 18px rgba(0,0,0,0.40);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.btn-primary:hover { filter: brightness(1.04); }
+.btn-primary:active { transform: scale(0.985); }
+.btn-primary.saved {
+  background: linear-gradient(180deg, #6BE3A4 0%, #4FBF85 100%);
+  color: #062014;
+}
+
+.save-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 6px;
+}
+.saved-tag {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+  color: var(--success);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.saved-tag.show { opacity: 1; }
+
+.modal-divider {
+  height: 1px; background: rgba(255,255,255,0.07);
+  margin: 22px 0 18px;
+}
+
+/* Whoop card */
+.whoop-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 16px;
+}
+.whoop-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 12px;
+}
+.whoop-status {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+}
+.whoop-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-tertiary);
+  box-shadow: 0 0 0 0 transparent;
+}
+.whoop-dot.on {
+  background: var(--success);
+  box-shadow: 0 0 10px rgba(107,227,164,0.55);
+}
+.whoop-brand {
+  font-family: var(--font-mono);
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.whoop-last {
+  font-size: 11.5px; color: var(--text-tertiary);
+  margin-bottom: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.whoop-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  margin-bottom: 12px;
+}
+.whoop-stat {
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.whoop-stat-label {
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+.whoop-stat-value {
+  font-family: var(--font-mono);
+  font-size: 18px; font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.whoop-btn {
+  width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-primary);
+  border-radius: 10px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+.whoop-btn:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.16);
+}
+.whoop-btn.syncing { opacity: 0.7; cursor: progress; }
+.whoop-btn.syncing .whoop-spin {
+  display: inline-block;
+  animation: whoop-spin 0.9s linear infinite;
+}
+@keyframes whoop-spin { to { transform: rotate(360deg); } }
 
 /* ===== Bento grid ===== */
 .bento {
@@ -187,7 +442,15 @@ body::after {
 <body>
 <div class="page">
 
-  <h1 class="dash-title">Dashboard</h1>
+  <div class="dash-header">
+    <h1 class="dash-title">Dashboard</h1>
+    <button class="gear-btn" id="settingsBtn" type="button" aria-label="Settings" title="Settings">
+      <svg class="gear-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
 
   <nav class="bento" aria-label="Dashboard sections">
 
@@ -260,5 +523,511 @@ body::after {
   </nav>
 
 </div>
+
+<!-- Settings modal -->
+<div class="modal-bg" id="settingsModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-head">
+      <h3 class="modal-title" id="settingsTitle">Your Data</h3>
+      <button class="modal-close" id="settingsClose" type="button" aria-label="Close">×</button>
+    </div>
+
+    <div class="field">
+      <span class="field-label">Height</span>
+      <div class="field-row height-cm" id="heightCmRow">
+        <input class="input" type="number" id="heightCm" min="80" max="260" step="1" inputmode="numeric" placeholder="cm">
+        <div class="seg" id="heightUnitSeg" role="tablist">
+          <button type="button" data-u="cm" class="active">cm</button>
+          <button type="button" data-u="ftin">ft/in</button>
+        </div>
+      </div>
+      <div class="field-row height-ftin" id="heightFtinRow" style="display:none">
+        <input class="input" type="number" id="heightFt" min="3" max="8" step="1" inputmode="numeric" placeholder="ft">
+        <input class="input" type="number" id="heightIn" min="0" max="11" step="1" inputmode="numeric" placeholder="in">
+        <div class="seg" id="heightUnitSeg2" role="tablist">
+          <button type="button" data-u="cm">cm</button>
+          <button type="button" data-u="ftin" class="active">ft/in</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-label">Weight</span>
+      <div class="field-row">
+        <input class="input" type="number" id="weightInput" min="20" max="500" step="0.5" inputmode="decimal">
+        <div class="seg" id="weightUnitSeg" role="tablist">
+          <button type="button" data-u="kg" class="active">kg</button>
+          <button type="button" data-u="lb">lb</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-label">Age</span>
+      <input class="input" type="number" id="ageInput" min="13" max="100" step="1" inputmode="numeric">
+    </div>
+
+    <div class="field">
+      <span class="field-label">Sex</span>
+      <div class="seg" id="sexSeg" role="tablist">
+        <button type="button" data-s="m" class="active">Male</button>
+        <button type="button" data-s="f">Female</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-label">Active hours / week</span>
+      <input class="input" type="number" id="activityInput" min="0" max="60" step="0.5" inputmode="decimal">
+    </div>
+
+    <div class="save-row">
+      <button class="btn-primary" id="saveBtn" type="button">Save</button>
+      <span class="saved-tag" id="savedTag">Saved ✓</span>
+    </div>
+
+    <div class="modal-divider"></div>
+
+    <div class="whoop-card">
+      <div class="whoop-head">
+        <span class="whoop-status">
+          <span class="whoop-dot" id="whoopDot"></span>
+          <span id="whoopStatusText">Not connected</span>
+        </span>
+        <span class="whoop-brand">Whoop</span>
+      </div>
+      <div class="whoop-last" id="whoopLast" style="display:none">Last synced —</div>
+      <div class="whoop-stats" id="whoopStats" style="display:none">
+        <div class="whoop-stat">
+          <div class="whoop-stat-label">Recovery</div>
+          <div class="whoop-stat-value" id="whoopRecovery">—</div>
+        </div>
+        <div class="whoop-stat">
+          <div class="whoop-stat-label">Sleep</div>
+          <div class="whoop-stat-value" id="whoopSleep">—</div>
+        </div>
+        <div class="whoop-stat">
+          <div class="whoop-stat-label">Rest HR</div>
+          <div class="whoop-stat-value" id="whoopRhr">—</div>
+        </div>
+      </div>
+      <button class="whoop-btn" id="whoopBtn" type="button">Sync now</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const LS_WATER = 'po_water_v1';
+  const LS_WHOOP_TOKENS = 'whoop_tokens_v1';
+  const LS_WHOOP_LAST = 'whoop_last_sync';
+
+  // ----- Defaults (mirror topbar.js defaultWaterState) -----
+  function defaultWaterState() {
+    return {
+      unit: 'bottle', bottleMl: 500, glassMl: 250, weightUnit: 'kg',
+      profile: { weightKg: 75, age: 25, sex: 'm', activityHrsPerWeek: 5,
+                 heightCm: 175, heightUnit: 'cm' },
+      caffeineMgPerDay: 200, substances: [], logs: {}
+    };
+  }
+  function loadWater() {
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem(LS_WATER)); } catch (e) {}
+    if (!s || typeof s !== 'object') s = defaultWaterState();
+    s.profile = s.profile || {};
+    return s;
+  }
+
+  // ----- Unit conversions -----
+  const kgFromLb = (lb) => lb / 2.20462;
+  const lbFromKg = (kg) => kg * 2.20462;
+  const cmFromFtIn = (ft, inch) => ((ft || 0) * 12 + (inch || 0)) * 2.54;
+  function ftInFromCm(cm) {
+    const totalIn = (cm || 0) / 2.54;
+    const ft = Math.floor(totalIn / 12);
+    const inch = Math.round(totalIn - ft * 12);
+    if (inch === 12) return { ft: ft + 1, in: 0 };
+    return { ft, in: inch };
+  }
+  function round1(n) { return Math.round(n * 10) / 10; }
+
+  // ----- Modal state for form values (working copy) -----
+  let weightUnit = 'kg';
+  let heightUnit = 'cm';
+  let sex = 'm';
+
+  function setSeg(segEl, attr, value) {
+    segEl.querySelectorAll('button').forEach((b) => {
+      b.classList.toggle('active', b.getAttribute(attr) === value);
+    });
+  }
+
+  function showHeightRow() {
+    $('heightCmRow').style.display   = heightUnit === 'cm'   ? '' : 'none';
+    $('heightFtinRow').style.display = heightUnit === 'ftin' ? '' : 'none';
+  }
+
+  // ----- Pre-fill from saved state -----
+  function prefill() {
+    const s = loadWater();
+    const p = s.profile || {};
+
+    weightUnit = s.weightUnit === 'lb' ? 'lb' : 'kg';
+    heightUnit = p.heightUnit === 'ftin' ? 'ftin' : 'cm';
+    sex = p.sex === 'f' ? 'f' : 'm';
+
+    setSeg($('weightUnitSeg'), 'data-u', weightUnit);
+    setSeg($('heightUnitSeg'),  'data-u', heightUnit);
+    setSeg($('heightUnitSeg2'), 'data-u', heightUnit);
+    setSeg($('sexSeg'), 'data-s', sex);
+    showHeightRow();
+
+    const wKg = p.weightKg != null ? p.weightKg : 75;
+    $('weightInput').value = weightUnit === 'lb'
+      ? round1(lbFromKg(wKg))
+      : round1(wKg);
+
+    const hCm = p.heightCm != null ? p.heightCm : 175;
+    $('heightCm').value = Math.round(hCm);
+    const fi = ftInFromCm(hCm);
+    $('heightFt').value = fi.ft;
+    $('heightIn').value = fi.in;
+
+    $('ageInput').value = p.age != null ? p.age : 25;
+    $('activityInput').value = p.activityHrsPerWeek != null ? p.activityHrsPerWeek : 5;
+  }
+
+  // ----- Read form back into normalized profile fields -----
+  function readForm() {
+    const wRaw = parseFloat($('weightInput').value);
+    const weightKg = isFinite(wRaw)
+      ? (weightUnit === 'lb' ? kgFromLb(wRaw) : wRaw)
+      : 75;
+
+    let heightCm;
+    if (heightUnit === 'ftin') {
+      const ft = parseInt($('heightFt').value, 10) || 0;
+      const inch = parseInt($('heightIn').value, 10) || 0;
+      heightCm = cmFromFtIn(ft, inch);
+    } else {
+      const v = parseFloat($('heightCm').value);
+      heightCm = isFinite(v) ? v : 175;
+    }
+
+    const age = parseInt($('ageInput').value, 10);
+    const activity = parseFloat($('activityInput').value);
+
+    return {
+      weightKg: Math.round(weightKg * 10) / 10,
+      heightCm: Math.round(heightCm * 10) / 10,
+      age: isFinite(age) ? age : 25,
+      sex: sex,
+      activityHrsPerWeek: isFinite(activity) ? activity : 0,
+      weightUnit: weightUnit,
+      heightUnit: heightUnit
+    };
+  }
+
+  // ----- Save: merge, never overwrite logs -----
+  function save() {
+    const incoming = readForm();
+    const current = loadWater();
+    const merged = Object.assign({}, defaultWaterState(), current, {
+      weightUnit: incoming.weightUnit,
+      logs: current.logs || {},
+      substances: current.substances || [],
+      profile: Object.assign({}, current.profile || {}, {
+        weightKg: incoming.weightKg,
+        heightCm: incoming.heightCm,
+        heightUnit: incoming.heightUnit,
+        age: incoming.age,
+        sex: incoming.sex,
+        activityHrsPerWeek: incoming.activityHrsPerWeek
+      })
+    });
+    try { localStorage.setItem(LS_WATER, JSON.stringify(merged)); } catch (e) {}
+
+    // Nudge other tabs / topbar to re-render.
+    try {
+      window.dispatchEvent(new StorageEvent('storage', { key: LS_WATER }));
+    } catch (e) {}
+
+    flashSaved();
+  }
+
+  let savedTimer = null;
+  function flashSaved() {
+    const tag = $('savedTag');
+    const btn = $('saveBtn');
+    tag.classList.add('show');
+    btn.classList.add('saved');
+    btn.textContent = 'Saved ✓';
+    clearTimeout(savedTimer);
+    savedTimer = setTimeout(() => {
+      tag.classList.remove('show');
+      btn.classList.remove('saved');
+      btn.textContent = 'Save';
+    }, 1800);
+  }
+
+  // ----- Unit toggles convert the currently shown value in place -----
+  function onWeightUnitChange(next) {
+    if (next === weightUnit) return;
+    const cur = parseFloat($('weightInput').value);
+    if (isFinite(cur)) {
+      const kg = weightUnit === 'lb' ? kgFromLb(cur) : cur;
+      $('weightInput').value = next === 'lb' ? round1(lbFromKg(kg)) : round1(kg);
+    }
+    weightUnit = next;
+    setSeg($('weightUnitSeg'), 'data-u', weightUnit);
+  }
+
+  function onHeightUnitChange(next) {
+    if (next === heightUnit) return;
+    if (next === 'ftin') {
+      const cm = parseFloat($('heightCm').value);
+      if (isFinite(cm)) {
+        const fi = ftInFromCm(cm);
+        $('heightFt').value = fi.ft;
+        $('heightIn').value = fi.in;
+      }
+    } else {
+      const ft = parseInt($('heightFt').value, 10) || 0;
+      const inch = parseInt($('heightIn').value, 10) || 0;
+      if (ft || inch) $('heightCm').value = Math.round(cmFromFtIn(ft, inch));
+    }
+    heightUnit = next;
+    setSeg($('heightUnitSeg'),  'data-u', heightUnit);
+    setSeg($('heightUnitSeg2'), 'data-u', heightUnit);
+    showHeightRow();
+  }
+
+  function onSexChange(next) {
+    sex = next;
+    setSeg($('sexSeg'), 'data-s', sex);
+  }
+
+  // ----- Modal open/close -----
+  const modal = $('settingsModal');
+
+  function openModal() {
+    prefill();
+    renderWhoop();
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    // Auto-sync once when the panel opens (only if connected).
+    const tokens = loadTokens();
+    if (tokens && tokens.access_token) syncWhoop(true);
+  }
+  function closeModal() {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  $('settingsBtn').addEventListener('click', openModal);
+  $('settingsClose').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+  });
+
+  $('saveBtn').addEventListener('click', save);
+
+  // Delegated segmented-control handlers.
+  $('weightUnitSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-u]');
+    if (b) onWeightUnitChange(b.dataset.u);
+  });
+  function bindHeightSeg(el) {
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-u]');
+      if (b) onHeightUnitChange(b.dataset.u);
+    });
+  }
+  bindHeightSeg($('heightUnitSeg'));
+  bindHeightSeg($('heightUnitSeg2'));
+  $('sexSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-s]');
+    if (b) onSexChange(b.dataset.s);
+  });
+
+  // ============================================================
+  // WHOOP
+  // ============================================================
+  function loadTokens() {
+    try { return JSON.parse(localStorage.getItem(LS_WHOOP_TOKENS)); }
+    catch (e) { return null; }
+  }
+  function saveTokens(t) {
+    try { localStorage.setItem(LS_WHOOP_TOKENS, JSON.stringify(t)); }
+    catch (e) {}
+  }
+  function lastSyncTs() {
+    const v = parseInt(localStorage.getItem(LS_WHOOP_LAST), 10);
+    return isFinite(v) ? v : 0;
+  }
+  function stampLastSync() {
+    try { localStorage.setItem(LS_WHOOP_LAST, String(Date.now())); }
+    catch (e) {}
+  }
+  function lastSyncLabel() {
+    const ts = lastSyncTs();
+    if (!ts) return 'Never synced';
+    const mins = Math.floor((Date.now() - ts) / 60000);
+    if (mins < 1) return 'Last synced just now';
+    if (mins === 1) return 'Last synced 1 min ago';
+    if (mins < 60) return 'Last synced ' + mins + ' min ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs === 1) return 'Last synced 1 hr ago';
+    if (hrs < 24) return 'Last synced ' + hrs + ' hr ago';
+    const days = Math.floor(hrs / 24);
+    return 'Last synced ' + days + 'd ago';
+  }
+
+  function renderWhoop() {
+    const tokens = loadTokens();
+    const connected = !!(tokens && tokens.access_token);
+    const dot = $('whoopDot');
+    const txt = $('whoopStatusText');
+    const last = $('whoopLast');
+    const stats = $('whoopStats');
+    const btn = $('whoopBtn');
+
+    if (connected) {
+      dot.classList.add('on');
+      txt.textContent = 'Connected';
+      last.style.display = '';
+      stats.style.display = '';
+      last.textContent = lastSyncLabel();
+      // Make sure the button isn't still a link from the not-connected state.
+      if (btn.tagName === 'A') {
+        const replacement = document.createElement('button');
+        replacement.id = 'whoopBtn';
+        replacement.type = 'button';
+        replacement.className = 'whoop-btn';
+        replacement.textContent = 'Sync now';
+        btn.parentNode.replaceChild(replacement, btn);
+        replacement.addEventListener('click', () => syncWhoop(false));
+      } else {
+        btn.textContent = 'Sync now';
+        btn.classList.remove('syncing');
+      }
+    } else {
+      dot.classList.remove('on');
+      txt.textContent = 'Not connected';
+      last.style.display = 'none';
+      stats.style.display = 'none';
+      // Swap button for a link to the health page.
+      if (btn.tagName !== 'A') {
+        const a = document.createElement('a');
+        a.id = 'whoopBtn';
+        a.className = 'whoop-btn';
+        a.href = 'health.html';
+        a.textContent = 'Connect on Health page';
+        btn.parentNode.replaceChild(a, btn);
+      } else {
+        btn.textContent = 'Connect on Health page';
+        btn.href = 'health.html';
+      }
+    }
+  }
+
+  // ----- Whoop API helpers -----
+  async function whoopFetch(path, tokens) {
+    // First attempt with current access token.
+    const callApi = (t) => fetch('/api/whoop-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: path, access_token: t.access_token })
+    });
+
+    let res = await callApi(tokens);
+    if (res.status === 401 && tokens.refresh_token) {
+      const r = await fetch('/api/whoop-refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: tokens.refresh_token })
+      });
+      if (!r.ok) throw new Error('refresh failed');
+      const refreshed = await r.json();
+      const next = Object.assign({}, tokens, refreshed);
+      saveTokens(next);
+      res = await callApi(next);
+    }
+    if (!res.ok) throw new Error('whoop ' + path + ' ' + res.status);
+    return res.json();
+  }
+
+  // The WHOOP API returns paginated `records`. Pull the most recent.
+  function firstRecord(payload) {
+    if (!payload) return null;
+    if (Array.isArray(payload.records) && payload.records.length) return payload.records[0];
+    if (Array.isArray(payload) && payload.length) return payload[0];
+    return payload;
+  }
+  function score(rec) {
+    return (rec && (rec.score || rec)) || {};
+  }
+
+  let syncing = false;
+  async function syncWhoop(silent) {
+    if (syncing) return;
+    const tokens = loadTokens();
+    if (!tokens || !tokens.access_token) return;
+    syncing = true;
+
+    const btn = $('whoopBtn');
+    if (btn && btn.tagName !== 'A') {
+      btn.classList.add('syncing');
+      btn.innerHTML = '<span class="whoop-spin">↻</span> Syncing…';
+    }
+
+    try {
+      const [recPayload, slpPayload] = await Promise.all([
+        whoopFetch('/recovery', tokens),
+        whoopFetch('/activity/sleep', tokens)
+      ]);
+      const rec = score(firstRecord(recPayload));
+      const slp = score(firstRecord(slpPayload));
+
+      const recoveryPct = rec.recovery_score;
+      const restingHr = rec.resting_heart_rate;
+      const sleepPct = slp.sleep_performance_percentage;
+
+      $('whoopRecovery').textContent = (recoveryPct != null) ? Math.round(recoveryPct) + '%' : '—';
+      $('whoopSleep').textContent    = (sleepPct    != null) ? Math.round(sleepPct)    + '%' : '—';
+      $('whoopRhr').textContent      = (restingHr   != null) ? Math.round(restingHr)         : '—';
+
+      stampLastSync();
+      $('whoopLast').textContent = lastSyncLabel();
+    } catch (e) {
+      if (!silent) {
+        $('whoopLast').textContent = 'Sync failed — try again';
+      }
+    } finally {
+      syncing = false;
+      const b = $('whoopBtn');
+      if (b && b.tagName !== 'A') {
+        b.classList.remove('syncing');
+        b.textContent = 'Sync now';
+      }
+    }
+  }
+
+  // Bind the initial sync button (it may be replaced on render — see renderWhoop).
+  $('whoopBtn').addEventListener('click', (e) => {
+    const tokens = loadTokens();
+    if (!tokens || !tokens.access_token) return; // link to health.html handles itself
+    e.preventDefault();
+    syncWhoop(false);
+  });
+})();
+</script>
 </body>
 </html>
