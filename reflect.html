@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="lock.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050506">
+<title>Reflect · Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sync.js" defer></script>
+<script src="topbar.js" defer></script>
+
+<style>
+:root {
+  --text-primary: #FAFAFA;
+  --text-secondary: #B8B6B0;
+  --text-tertiary: #76746E;
+  --success: #6BE3A4;
+  --warning: #F2C063;
+  --danger:  #FF6B6B;
+  --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: #050506;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  padding: max(28px, env(safe-area-inset-top)) 20px 60px;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(circle at 82% 14%, rgba(224, 118, 88, 0.16), transparent 45%),
+    radial-gradient(circle at 18% 90%, rgba(180, 180, 200, 0.06), transparent 50%);
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: -2;
+  animation: drift 36s ease-in-out infinite alternate;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.014) 1px, transparent 1px);
+  background-size: 3px 3px;
+  pointer-events: none;
+  z-index: -1;
+}
+@keyframes drift {
+  0%   { transform: translate3d(0,0,0); }
+  100% { transform: translate3d(-22px, 14px, 0); }
+}
+
+.page { max-width: 1100px; margin: 0 auto; }
+
+.dash-title {
+  margin: 0 0 14px;
+  font-size: 28px; font-weight: 700;
+  letter-spacing: -0.025em;
+  background: linear-gradient(180deg, #FFFFFF 0%, #C7C4BC 120%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+@media (max-width: 480px) { .dash-title { font-size: 22px; } }
+
+.dash-sub {
+  margin: -6px 0 18px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.section { margin-top: 8px; }
+.section-title {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-tertiary);
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.section-title::before {
+  content: ''; width: 18px; height: 1px;
+  background: var(--text-tertiary); opacity: 0.6;
+}
+.section-title::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent);
+}
+
+.gm-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  overflow: hidden;
+}
+
+.gm-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 14px;
+}
+.gm-header-left { display: flex; flex-direction: column; }
+.gm-eyebrow {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-tertiary); margin-bottom: 6px;
+}
+.gm-progress-row { display: flex; align-items: baseline; gap: 6px; }
+.gm-progress-num {
+  font-size: 42px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em; color: var(--text-primary); line-height: 1;
+}
+.gm-progress-total { font-family: var(--font-mono); font-size: 18px; color: var(--text-tertiary); }
+.gm-progress-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--text-tertiary); margin-left: 4px;
+}
+
+.gm-streak {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px; border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-tertiary);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.10em; text-transform: uppercase;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+.stat {
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px; padding: 14px;
+}
+.stat-num {
+  font-size: 26px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em; color: var(--text-primary); line-height: 1;
+}
+.stat-num.muted { color: var(--text-tertiary); }
+.stat-num.good { color: var(--success); }
+.stat-label {
+  margin-top: 6px;
+  font-size: 10.5px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* Mood selector */
+.mood-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.mood-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 6px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  color: var(--text-tertiary);
+  font-family: inherit; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.mood-btn:hover { background: rgba(255,255,255,0.06); }
+.mood-btn:active { transform: scale(0.97); }
+.mood-btn .mood-emoji {
+  font-size: 26px;
+  line-height: 1;
+  filter: grayscale(0.5) opacity(0.7);
+  transition: filter 0.2s, transform 0.2s;
+}
+.mood-btn .mood-label {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.mood-btn.selected {
+  background: rgba(107,227,164,0.08);
+  border-color: rgba(107,227,164,0.45);
+  color: var(--text-primary);
+  box-shadow: 0 0 18px rgba(107,227,164,0.18);
+}
+.mood-btn.selected .mood-emoji {
+  filter: grayscale(0) opacity(1);
+  transform: scale(1.08);
+}
+
+/* Three "wins" inputs */
+.wins-list { display: flex; flex-direction: column; gap: 8px; }
+.win-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+}
+.win-num {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700;
+}
+.win-input {
+  flex: 1; min-width: 0;
+  background: transparent; border: 0; outline: none;
+  color: var(--text-primary);
+  font-family: inherit; font-size: 14px;
+}
+.win-input::placeholder { color: var(--text-tertiary); }
+
+/* Journal textarea */
+.journal-area {
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  background: rgba(0,0,0,0.28);
+  color: var(--text-primary);
+  font-family: inherit; font-size: 14px;
+  line-height: 1.55;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.journal-area::placeholder { color: var(--text-tertiary); }
+.journal-area:focus { border-color: rgba(255,255,255,0.28); background: rgba(0,0,0,0.36); }
+
+.save-hint {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  min-height: 14px;
+}
+
+/* History strip — last 7 days */
+.history-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+.history-cell {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 4px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  text-align: center;
+}
+.history-cell.empty {
+  background: rgba(255,255,255,0.02);
+  border-style: dashed;
+  border-color: rgba(255,255,255,0.04);
+}
+.history-cell.today {
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.06);
+}
+.history-day {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.history-emoji {
+  font-size: 22px; line-height: 1;
+}
+.history-emoji.dim {
+  filter: grayscale(1) opacity(0.35);
+}
+.history-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 480px) {
+  body { padding: max(20px, env(safe-area-inset-top)) 14px 50px; }
+  .gm-card { padding: 16px; }
+  .gm-progress-num { font-size: 36px; }
+  .mood-btn { padding: 10px 4px; }
+  .mood-btn .mood-emoji { font-size: 22px; }
+  .history-cell { padding: 8px 2px; }
+  .history-emoji { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1 class="dash-title">Reflect</h1>
+  <div class="dash-sub" id="dateSub">—</div>
+
+  <!-- Today snapshot, read from goals/water/supplements/streak -->
+  <div class="section">
+    <div class="section-title">Today's Snapshot</div>
+    <div class="gm-card">
+      <div class="gm-header">
+        <div class="gm-header-left">
+          <div class="gm-eyebrow">Reflection Streak</div>
+          <div class="gm-progress-row">
+            <span class="gm-progress-num" id="reflectStreak">0</span>
+            <span class="gm-progress-label">days</span>
+          </div>
+        </div>
+        <span class="gm-streak" id="goalStreakPill">·</span>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="stat-num" id="snapGoals">0/0</div>
+          <div class="stat-label">Goals Done</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="snapWater">0/0</div>
+          <div class="stat-label">Water</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="snapStack">0/0</div>
+          <div class="stat-label">Supplements</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="snapMood">—</div>
+          <div class="stat-label">Mood</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mood -->
+  <div class="section">
+    <div class="section-title">How are you?</div>
+    <div class="gm-card">
+      <div class="mood-row" id="moodRow">
+        <button class="mood-btn" type="button" data-mood="1">
+          <span class="mood-emoji">😞</span><span class="mood-label">Low</span>
+        </button>
+        <button class="mood-btn" type="button" data-mood="2">
+          <span class="mood-emoji">😕</span><span class="mood-label">Meh</span>
+        </button>
+        <button class="mood-btn" type="button" data-mood="3">
+          <span class="mood-emoji">😐</span><span class="mood-label">OK</span>
+        </button>
+        <button class="mood-btn" type="button" data-mood="4">
+          <span class="mood-emoji">🙂</span><span class="mood-label">Good</span>
+        </button>
+        <button class="mood-btn" type="button" data-mood="5">
+          <span class="mood-emoji">😄</span><span class="mood-label">Great</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three wins -->
+  <div class="section">
+    <div class="section-title">Three Wins</div>
+    <div class="gm-card">
+      <div class="wins-list">
+        <div class="win-row">
+          <span class="win-num">1</span>
+          <input class="win-input" type="text" data-win="0" placeholder="Something that went well…" autocomplete="off">
+        </div>
+        <div class="win-row">
+          <span class="win-num">2</span>
+          <input class="win-input" type="text" data-win="1" placeholder="Something you're grateful for…" autocomplete="off">
+        </div>
+        <div class="win-row">
+          <span class="win-num">3</span>
+          <input class="win-input" type="text" data-win="2" placeholder="One more thing…" autocomplete="off">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Journal -->
+  <div class="section">
+    <div class="section-title">Journal</div>
+    <div class="gm-card">
+      <textarea class="journal-area" id="journalArea"
+                placeholder="What's on your mind? What did today teach you?"></textarea>
+      <div class="save-hint" id="saveHint"></div>
+    </div>
+  </div>
+
+  <!-- 7-day history -->
+  <div class="section">
+    <div class="section-title">Past Week</div>
+    <div class="gm-card">
+      <div class="history-strip" id="historyStrip"></div>
+    </div>
+  </div>
+
+</div><!-- /.page -->
+
+<script>
+/* =============================================================== */
+/*  REFLECT — daily journal page.                                  */
+/*                                                                 */
+/*  Writes one localStorage key: 'tpl:reflect' (synced as a whole) */
+/*  Shape: { entries: { 'YYYY-MM-DD': { mood, wins[3], journal } } }
+/*                                                                 */
+/*  Reads from existing app data for the snapshot (read-only):     */
+/*    goals:YYYY-MM-DD, goal_streak_v1,                            */
+/*    stack:items, stack:taken:YYYY-MM-DD,                         */
+/*    po_water_v1                                                  */
+/* =============================================================== */
+(function () {
+  'use strict';
+
+  const SECTION_ID = 'reflect';
+  const STORE_KEY  = 'tpl:' + SECTION_ID;
+
+  const MOOD_EMOJI = { 1: '😞', 2: '😕', 3: '😐', 4: '🙂', 5: '😄' };
+
+  // --- date helpers (match the 6 AM rollover used everywhere else) -
+  function activeDateKey() {
+    const now = new Date();
+    const d = new Date(now);
+    if (now.getHours() < 6) d.setDate(d.getDate() - 1);
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
+  function calendarDateKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
+  function shiftDate(dateStr, deltaDays) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    dt.setDate(dt.getDate() + deltaDays);
+    return dt.getFullYear() + '-' +
+      String(dt.getMonth() + 1).padStart(2, '0') + '-' +
+      String(dt.getDate()).padStart(2, '0');
+  }
+  function prettyDate(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString(undefined, {
+      weekday: 'long', month: 'long', day: 'numeric'
+    });
+  }
+  function weekday3(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: 'short' });
+  }
+
+  // --- store -------------------------------------------------------
+  function loadStore() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(STORE_KEY));
+      if (raw && typeof raw === 'object' && raw.entries) return raw;
+    } catch (e) {}
+    return { entries: {} };
+  }
+  function saveStore(store) {
+    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  }
+  function getEntry(dateStr) {
+    const store = loadStore();
+    return store.entries[dateStr] || null;
+  }
+  function setEntry(dateStr, patch) {
+    const store = loadStore();
+    const current = store.entries[dateStr] || { mood: 0, wins: ['', '', ''], journal: '' };
+    store.entries[dateStr] = Object.assign({}, current, patch);
+    // Clean up: if everything is empty, drop the row entirely so
+    // history doesn't show stale skeletons.
+    const e = store.entries[dateStr];
+    const hasContent = e.mood || e.journal.trim() ||
+      (e.wins || []).some(w => w && w.trim());
+    if (!hasContent) delete store.entries[dateStr];
+    saveStore(store);
+  }
+
+  // --- snapshot reads (cross-page, read-only) ----------------------
+  function getGoalsProgress(dateStr) {
+    let goals = [];
+    try { goals = JSON.parse(localStorage.getItem('goals:' + dateStr)) || []; }
+    catch (e) {}
+    const total = Array.isArray(goals) ? goals.length : 0;
+    const done = total ? goals.filter(g => g && g.done).length : 0;
+    return { done, total };
+  }
+  function getStackProgress(dateStr) {
+    let items = [], taken = {};
+    try { items = JSON.parse(localStorage.getItem('stack:items')) || []; } catch (e) {}
+    try { taken = JSON.parse(localStorage.getItem('stack:taken:' + dateStr)) || {}; } catch (e) {}
+    const total = Array.isArray(items) ? items.length : 0;
+    const done = total ? items.filter(i => i && taken[i.id]).length : 0;
+    return { done, total };
+  }
+  function getWaterProgress() {
+    let state = null;
+    try { state = JSON.parse(localStorage.getItem('po_water_v1')); } catch (e) {}
+    if (!state) return { done: 0, total: 0 };
+    const todayK = calendarDateKey();
+    const done = (state.logs || {})[todayK] || 0;
+    const p = state.profile || { weightKg: 75 };
+    const wKg = state.weightUnit === 'lb' ? (p.weightKg || 0) / 2.20462 : (p.weightKg || 0);
+    const base = wKg * 35;
+    const exercise = (p.activityHrsPerWeek || 0) / 7 * 500;
+    const caffeine = Math.max(0, (state.caffeineMgPerDay || 0) - 200) * 1.5;
+    const subs = (state.substances || []).reduce((s, x) => {
+      const dose = (x && x.dose != null ? x.dose : (x && x.defaultDose)) || 0;
+      return s + Math.max(0, dose * ((x && x.mlPerUnit) || 0));
+    }, 0);
+    let adjust = 0;
+    if (p.sex === 'm') adjust += 200;
+    if ((p.age || 0) >= 50) adjust += 100;
+    const totalMl = base + exercise + caffeine + subs + adjust;
+    let unitVol;
+    if (state.unit === 'glass') unitVol = state.glassMl || 250;
+    else if (state.unit === 'oz')  unitVol = 30;
+    else if (state.unit === 'ml')  unitVol = 1;
+    else unitVol = state.bottleMl || 500;
+    const total = Math.max(1, Math.ceil(totalMl / unitVol));
+    return { done, total };
+  }
+  function getGoalStreak() {
+    try {
+      const s = JSON.parse(localStorage.getItem('goal_streak_v1'));
+      return (s && typeof s.count === 'number') ? s.count : 0;
+    } catch (e) { return 0; }
+  }
+
+  // --- reflection streak (consecutive days ending today w/ entries) -
+  function getReflectionStreak() {
+    const store = loadStore();
+    let cursor = activeDateKey();
+    let streak = 0;
+    // Cap at 365 to keep the loop bounded.
+    for (let i = 0; i < 365; i++) {
+      if (store.entries[cursor]) {
+        streak += 1;
+        cursor = shiftDate(cursor, -1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  // --- render snapshot ---------------------------------------------
+  function renderSnapshot() {
+    const dateStr = activeDateKey();
+    const goals = getGoalsProgress(dateStr);
+    const stack = getStackProgress(dateStr);
+    const water = getWaterProgress();
+    const entry = getEntry(dateStr);
+
+    document.getElementById('dateSub').textContent = prettyDate(dateStr);
+
+    const g = document.getElementById('snapGoals');
+    g.textContent = goals.total ? (goals.done + '/' + goals.total) : '—';
+    g.classList.toggle('muted', !goals.total);
+    g.classList.toggle('good', goals.total > 0 && goals.done >= goals.total);
+
+    const w = document.getElementById('snapWater');
+    w.textContent = water.total ? (water.done + '/' + water.total) : '—';
+    w.classList.toggle('muted', !water.total);
+    w.classList.toggle('good', water.total > 0 && water.done >= water.total);
+
+    const s = document.getElementById('snapStack');
+    s.textContent = stack.total ? (stack.done + '/' + stack.total) : '—';
+    s.classList.toggle('muted', !stack.total);
+    s.classList.toggle('good', stack.total > 0 && stack.done >= stack.total);
+
+    const m = document.getElementById('snapMood');
+    m.textContent = entry && entry.mood ? MOOD_EMOJI[entry.mood] : '—';
+    m.classList.toggle('muted', !(entry && entry.mood));
+
+    document.getElementById('reflectStreak').textContent = getReflectionStreak();
+
+    const goalStreak = getGoalStreak();
+    const pill = document.getElementById('goalStreakPill');
+    pill.textContent = goalStreak > 0
+      ? ('🔥 ' + goalStreak + ' day goal streak')
+      : 'No goal streak yet';
+  }
+
+  // --- render mood + wins + journal --------------------------------
+  function renderEntry() {
+    const dateStr = activeDateKey();
+    const entry = getEntry(dateStr) || { mood: 0, wins: ['', '', ''], journal: '' };
+
+    document.querySelectorAll('.mood-btn').forEach(btn => {
+      const v = Number(btn.dataset.mood);
+      btn.classList.toggle('selected', v === entry.mood);
+    });
+
+    document.querySelectorAll('.win-input').forEach(inp => {
+      const idx = Number(inp.dataset.win);
+      if (document.activeElement !== inp) {
+        inp.value = (entry.wins && entry.wins[idx]) || '';
+      }
+    });
+
+    const ja = document.getElementById('journalArea');
+    if (document.activeElement !== ja) {
+      ja.value = entry.journal || '';
+    }
+  }
+
+  // --- render 7-day history ----------------------------------------
+  function renderHistory() {
+    const strip = document.getElementById('historyStrip');
+    const today = activeDateKey();
+    let html = '';
+    for (let i = 6; i >= 0; i--) {
+      const ds = shiftDate(today, -i);
+      const e = getEntry(ds);
+      const isToday = i === 0;
+      const cls = ['history-cell'];
+      if (isToday) cls.push('today');
+      if (!e) cls.push('empty');
+      const emoji = e && e.mood ? MOOD_EMOJI[e.mood] : '·';
+      const emojiCls = (e && e.mood) ? 'history-emoji' : 'history-emoji dim';
+      const dayLabel = isToday ? 'Today' : weekday3(ds);
+      const dateNum = ds.slice(-5).replace('-', '/');
+      html += '<div class="' + cls.join(' ') + '" title="' + prettyDate(ds) + '">' +
+              '<span class="history-day">' + dayLabel + '</span>' +
+              '<span class="' + emojiCls + '">' + emoji + '</span>' +
+              '<span class="history-date">' + dateNum + '</span>' +
+              '</div>';
+    }
+    strip.innerHTML = html;
+  }
+
+  function renderAll() {
+    renderSnapshot();
+    renderEntry();
+    renderHistory();
+  }
+
+  // --- inputs ------------------------------------------------------
+  function flashSave() {
+    const hint = document.getElementById('saveHint');
+    hint.textContent = 'Saved';
+    clearTimeout(flashSave._t);
+    flashSave._t = setTimeout(() => { hint.textContent = ''; }, 1200);
+  }
+
+  document.querySelectorAll('.mood-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dateStr = activeDateKey();
+      const v = Number(btn.dataset.mood);
+      const current = getEntry(dateStr);
+      // Toggle off if tapping the already-selected mood.
+      const next = current && current.mood === v ? 0 : v;
+      setEntry(dateStr, { mood: next });
+      renderAll();
+      flashSave();
+    });
+  });
+
+  document.querySelectorAll('.win-input').forEach(inp => {
+    inp.addEventListener('blur', () => {
+      const dateStr = activeDateKey();
+      const idx = Number(inp.dataset.win);
+      const current = getEntry(dateStr) || { wins: ['', '', ''] };
+      const wins = (current.wins || ['', '', '']).slice();
+      wins[idx] = inp.value.trim();
+      setEntry(dateStr, { wins });
+      renderHistory();
+      renderSnapshot();
+      flashSave();
+    });
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); inp.blur(); }
+    });
+  });
+
+  const ja = document.getElementById('journalArea');
+  let journalSaveTimer = null;
+  ja.addEventListener('input', () => {
+    clearTimeout(journalSaveTimer);
+    journalSaveTimer = setTimeout(() => {
+      const dateStr = activeDateKey();
+      setEntry(dateStr, { journal: ja.value });
+      renderHistory();
+      renderSnapshot();
+      flashSave();
+    }, 600);
+  });
+  ja.addEventListener('blur', () => {
+    clearTimeout(journalSaveTimer);
+    const dateStr = activeDateKey();
+    setEntry(dateStr, { journal: ja.value });
+    renderHistory();
+    renderSnapshot();
+    flashSave();
+  });
+
+  // --- live updates from other pages / tabs ------------------------
+  window.addEventListener('storage', e => {
+    if (!e.key) { renderAll(); return; }
+    // Snapshot can change when goals / supplements / water update.
+    if (e.key.indexOf('goals:') === 0 ||
+        e.key.indexOf('stack:') === 0 ||
+        e.key === 'po_water_v1' ||
+        e.key === 'goal_streak_v1' ||
+        e.key === STORE_KEY) {
+      renderAll();
+    }
+  });
+  window.addEventListener('goals-changed', renderSnapshot);
+
+  renderAll();
+
+  // --- cloud sync --------------------------------------------------
+  if (window.initCloudSync) {
+    window.initCloudSync({
+      appKey: 'reflect',
+      syncedKeys: [STORE_KEY],
+      onApplied: renderAll
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
